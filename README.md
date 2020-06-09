@@ -1,2 +1,2 @@
 # annexes-these
-Implémentations informatique utilisées durant ma thèse de doctorat
+Implémentations et code informatique utilisés durant ma thèse de doctorat
