@@ -1,0 +1,136 @@
+with(combinat);with(linalg);with(LinearAlgebra); with(Student[LinearAlgebra]);
+
+
+##### ON CONSIDERE DANS CE FICHIER LE CAS DES 3x2x2 qutrits et NON PAS CELUI DES 2x2x3 qutrits COMME DANS L'ARTICLE.
+##### IL EN RESULTE DONC UN INVERSION DES VARIABLES x0,x1,x2 avec z0,z1,z2, AINSI QUE DANS "THE GROUD FORM" A(x,y,z)
+
+transv11:=proc(F,G,u,v) local res ;
+res:=
+diff(diff(F,cat(u,0)),cat(v,0))*diff(diff(G,cat(u,1)),cat(v,1))
+-
+diff(diff(F,cat(u,0)),cat(v,1))*diff(diff(G,cat(u,1)),cat(v,0))
+-
+diff(diff(F,cat(u,1)),cat(v,0))*diff(diff(G,cat(u,0)),cat(v,1))
++
+diff(diff(F,cat(u,1)),cat(v,1))*diff(diff(G,cat(u,0)),cat(v,0));
+map(factor, collect(res,vv,distributed));
+end;
+
+transv1:=proc(F,G,u) local res;
+res:=diff(F,cat(u,0))*diff(G,cat(u,1))-diff(F,cat(u,1))*diff(G,cat(u,0));
+map(factor, collect(res,vv,distributed));
+end;
+
+F8:=proc() global a;
+for i to 3 do for j to 2 do for k to 2 do a[i-1,j-1,k-1]:=0; od;od;od;
+a[0,0,0]:=1;a[1,1,0]:=1;a[1,0,1]:=1;a[2,1,1]:=1;
+end;
+
+F7:=proc() global a;
+for i to 3 do for j to 2 do for k to 2 do a[i-1,j-1,k-1]:=0; od;od;od;
+a[0,0,0]:=1;a[1,1,0]:=1;a[2,0,1]:=1;
+end;
+
+F6:=proc() global a;
+for i to 3 do for j to 2 do for k to 2 do a[i-1,j-1,k-1]:=0; od;od;od;
+a[0,0,0]:=1;a[1,1,1]:=1;
+end;
+
+
+F5:=proc() global a;
+for i to 3 do for j to 2 do for k to 2 do a[i-1,j-1,k-1]:=0; od;od;od;
+a[0,0,0]:=1;a[1,1,0]:=1;a[1,0,1]:=1;
+end;
+
+F4:=proc() global a;
+for i to 3 do for j to 2 do for k to 2 do a[i-1,j-1,k-1]:=0; od;od;od;
+a[0,0,0]:=1;a[1,1,0]:=1;
+end;
+
+F3:=proc() global a;
+for i to 3 do for j to 2 do for k to 2 do a[i-1,j-1,k-1]:=0; od;od;od;
+a[0,0,0]:=1;;a[1,0,1]:=1;
+end;
+
+F2:=proc() global a;
+for i to 3 do for j to 2 do for k to 2 do a[i-1,j-1,k-1]:=0; od;od;od;
+a[0,0,0]:=1;a[0,1,1]:=1;
+end;
+
+F1:=proc() global a;
+for i to 3 do for j to 2 do for k to 2 do a[i-1,j-1,k-1]:=0; od;od;od;
+a[0,0,0]:=1;
+end;
+
+
+######
+x[1]:=x0;x[2]:=x1;x[3]:=x2;
+y[1]:=y0;y[2]:=y1;y[3]:=y2;
+z[1]:=z0;z[2]:=z1;z[3]:=z2;
+
+A:=(x,y,z)->sum(sum(sum('a[ii-1,jj-1,kk-1]*x[ii]*y[jj]*z[kk]',ii=1..3),jj=1..2),kk=1..2);
+
+#B:=proc(xi)local i,j;subs(x=xi,det(matrix(2,2,[seq(seq(diff(diff(A(x,y,z),y[i]),z[j]),i=1..2),j=1..2)])));end;
+
+B:=(xi)->subs({x2=xi[3],x0=xi[1],x1=xi[2]},transv11(A(x,y,z),A(x,y,z),y,z));
+
+
+
+Omega:=proc(x,f) diff(diff(diff(f,x||1[1]),x||2[2]),x||3[3])-diff(diff(diff(f,x||1[1]),x||2[3]),x||3[2])-diff(diff(diff(f,x||1[2]),x||2[1]),x||3[3])+diff(diff(diff(f,x||1[2]),x||2[3]),x||3[1])-diff(diff(diff(f,x||1[3]),x||2[2]),x||3[1])+diff(diff(diff(f,x||1[3]),x||2[1]),x||3[2]);end;
+
+Omega2:=proc(x,f) diff(diff(f,cat(x,1)[1]),cat(x,2)[2])-diff(diff(f,cat(x,1)[2]),cat(x,2)[1])end;
+
+
+tr:=proc(P) subs({x1=x,x2=x,x3=x,y1=y,y2=y,y3=y,z1=z,z2=z,z3=z,xi1=xi,xi2=xi,xi3=xi,eta1=eta,eta2=eta,eta3=eta,zeta1=zeta,zeta2=zeta,zeta3=zeta},P);end;
+
+
+Q:=(xi)->subs({x2=xi[3],x0=xi[1],x1=xi[2]},transv11(A(x,y,z),A(x,y,z),y,z));
+
+Bxyzxi:=(xxi,yi,zi,xii)->eval(subs({x0=xxi[1],x1=xxi[2],x2=xxi[3],y0=yi[1],y1=yi[2],y2=yi[3],z0=zi[1],
+z1=zi[2],z2=zi[3],xi=xii},eval(tr(Omega(x,A(x1,y1,z1)*Q(x2,y2,z2)*P(x3,xi3))))));
+
+Bzxi:=(zi,xii)->eval(subs({x0=xxi[1],x1=xxi[2],x2=xxi[3],y0=yi[1],y1=yi[2],y2=yi[3],z0=zi[1],
+z1=zi[2],z2=zi[3],xi=xii},eval(tr(Omega2(y,Omega(x,A(x1,y1,z1)*A(x2,y2,z2)*P(x3,xi3)))))));
+
+Byxi:=(yi,xii)->eval(subs({x0=xxi[1],x1=xxi[2],x2=xxi[3],y0=yi[1],y1=yi[2],y2=yi[3],z0=zi[1],
+z1=zi[2],z2=zi[3],xi=xii},eval(tr(Omega2(z,Omega(x,A(x1,y1,z1)*A(x2,y2,z2)*P(x3,xi3)))))));
+
+
+tr(Omega(xi,Bxyzxi(x1,y1,z1,xi1),P(x2,xi2),P(x3,xi3)));
+
+#Bxy:=(x,y)->subs({x2=xi[3],x0=xi[1],x1=xi[2],y0=yi[1],y1=yi[2]},transv1(A(x,y,z),A(x,y,z),y));
+
+
+#C:=proc() local PP,temp; PP:=permute(3);
+#temp:=0;
+#for i to nops(PP) do
+#    for j to 2 do for k to 2 do
+#temp:=temp+(-1)^(nops(Perm2ListInv(PP[i])))*a[PP[i][1]-1,j-1,k-1]*(a[PP[i][2]-1,0,0]*a[PP[i][3]-1,1,1]-a[PP[i][2]-1,1,0]*a[PP[i][3]-1,0,1])*cat(y,j-1)*cat(z,k-1);
+#    od:
+#od;
+#od;
+#temp;
+#end;
+
+C :=proc()
+
+Determinant(Matrix(4, 4, [[a[0, 0, 0], a[0, 0, 1], a[0, 1, 0], a[0, 1, 1]], [a[1, 0, 0], a[1, 0, 1], a[1, 1, 0], a[1, 1, 1]], [a[2, 0, 0], a[2, 0, 1], a[2, 1, 0], a[2, 1, 1]], [z[2]*y[2], -z[1]*y[2], -z[2]*y[1], z[1]*y[1]]]));
+ 
+end;
+
+
+Delta:=()->det(matrix(2,2,[seq(seq(diff(diff(C(x,y,z),y[j]),z[k]),j=1..2),k=1..2)]));
+
+#Dxi:=(xii)->eval(subs({xii=xi},tr(Omega(x,Omega(x,Q(x1)*Q(x2)*P(x3,xi)^2)))));
+
+Dxi:=(xiii)->eval(subs({xii3[1]=cat(xiii,0),xii3[2]=cat(xiii,1),xii3[3]=cat(xiii,2)},tr(Omega(x,Omega(x,B(x1)*B(x2)*P(x3,xii3)^2)))));
+
+HIxi:=(xii)->eval(subs({xii=xi},tr((Omega(x,Q(x1)*Q(x2)*P(x3,xi3))))));
+
+P:=(x,xi)->sum('x[ii]*xi[ii]',ii=1..3);
+
+##########
+
+isnull:=proc(x) if expand(x)=0 then 0 else 1;fi;end;
+
+FGen:=proc() global a:a:='a';end;
